@@ -24,7 +24,7 @@ class TextNode:
 def text_node_to_html_node(text_node):
     match text_node:
         case TextType.TEXT:
-            return LeafNode(None, text_node.text)
+            return LeafNode("text", text_node.text)
         case TextType.BOLD_TEXT:
             return LeafNode("b", text_node.text)
         case TextType.ITALIC_TEXT:
@@ -37,3 +37,14 @@ def text_node_to_html_node(text_node):
             return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
         case _:
             raise Exception("Invalid text type")
+        
+def split_nodes_delimiter(old_nodes, delimiter, text_type):
+    new_nodes = []
+    for node in old_nodes:
+        split_text = node.text.split(delimiter)
+        if len(split_text) > 1:
+            for text in split_text:
+                new_nodes += TextNode(text, text_type)
+        else:
+            new_nodes.append(node)
+    return new_nodes
