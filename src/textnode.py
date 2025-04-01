@@ -10,6 +10,16 @@ class TextType(Enum):
     IMAGE_TEXT = "image"
     TEXT = "text"
     
+class BlockType(Enum):
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered_list"
+    ORDERED_LIST = "ordered_list"
+    
+    
+    
 class TextNode:
     def __init__(self, text, text_type, url=None):
         self.url = url  
@@ -57,3 +67,75 @@ def extract_markdown_images(text):
 def extract_markdown_links(text):
     links = re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return links
+
+def split_nodes_image(old_nodes):
+    new_nodes = []
+    for node in old_nodes:
+        images = extract_markdown_images(node.text)
+        if len(images) > 0:
+            for image in images:
+                new_nodes.append(TextNode(image[0], TextType.IMAGE_TEXT, image[1]))
+        else:
+            new_nodes.append(node)
+    return new_nodes
+
+def split_nodes_link(old_nodes):
+    new_nodes = []
+    for node in old_nodes:
+        links = extract_markdown_links(node.text)
+        if len(links) > 0:
+            for link in links:
+                new_nodes.append(TextNode(link[0], TextType.LINK_TEXT, link[1]))
+        else:
+            new_nodes.append(node)
+    return new_nodes
+
+def text_to_textnodes(text):
+    text = text.replace("\n", " ")
+    text = text.replace("\t", " ")
+    text = re.sub(r"\s+", " ", text)
+    text = text.strip()
+    
+    nodes = []
+    if len(text) == 0:
+        return nodes
+    
+    nodes.append(TextNode(text, TextType.TEXT))
+    
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD_TEXT)
+    nodes = split_nodes_delimiter(nodes, "*", TextType.ITALIC_TEXT)
+    nodes = split_nodes_delimiter(nodes, "`", TextType.CODE_TEXT)
+    
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    
+    return nodes
+
+def markdown_to_blocks(markdown):
+    blocks = []
+    lines = markdown.split("\n")
+    
+    for line in lines:
+        if len(line) == 0:
+            continue
+        blocks.append(text_to_textnodes(line))
+    
+    return blocks
+
+def block_to_block_type(block):
+    if block[0].text_type == TextType.TEXT:
+        return BlockType.PARAGRAPH
+    elif block[0].text_type == TextType.BOLD_TEXT:
+        return BlockType.HEADING
+    elif block[0].text_type == TextType.CODE_TEXT:
+        return BlockType.CODE
+    elif block[0].text_type == TextType.IMAGE_TEXT:
+        return BlockType.QUOTE
+    elif block[0].text_type == TextType.LINK_TEXT:
+        return BlockType.UNORDERED_LIST
+    else:
+        return BlockType.ORDERED_LIST
+    
+def recursive
+
+
