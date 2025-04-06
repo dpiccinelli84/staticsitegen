@@ -14,9 +14,7 @@ template_path = "./template.html"
 def main():
     if len(sys.argv) > 1:
       basepath =  sys.argv[1]
-    else:
-      basepath = ""
-      
+    
   
   
     print("Deleting public directory...")
@@ -27,8 +25,7 @@ def main():
     copy_files_recursive(dir_path_static, dir_path_public)
 
     print("Generating page...")
-    generate_pages_recursive(
-  os.path.join(basepath, dir_path_content), os.path.join(basepath, template_path), os.path.join(basepath, dir_path_public))
+    generate_pages_recursive(dir_path_content, template_path, dir_path_public, basepath)
     
 
 
